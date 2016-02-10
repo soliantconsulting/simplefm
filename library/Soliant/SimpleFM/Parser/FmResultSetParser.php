@@ -72,15 +72,16 @@ class FmResultSetParser extends AbstractParser
                 // handle portals
                 foreach ($xml->resultset[0]->record[0]->relatedset as $portal) {
                     $portalname = (string)$portal['table'];
-
-                    $rows[$conditional_id][$portalname]['parentindex'] = (int)$counterI;
-                    $rows[$conditional_id][$portalname]['parentrecid'] = (int)$row['record-id'];
-                    $rows[$conditional_id][$portalname]['portalindex'] = (int)$counterIi;
+                    $portalRow = array();
+                    
+                    $portalRow['parentindex'] = (int)$counterI;
+                    $portalRow['parentrecid'] = (int)$row['record-id'];
+                    $portalRow['portalindex'] = (int)$counterIi;
                     /**
                      * @TODO Verify if next line is a bug where portalrecordcount may be returning same value for all
                      * portals. Test for possible issues with $portalname being non-unique.
                      */
-                    $rows[$conditional_id][$portalname]['portalrecordcount'] = (int)$portal['count'];
+                    $portalRow['portalrecordcount'] = (int)$portal['count'];
 
                     // the portal row index
                     $counterIii = 0;
@@ -88,9 +89,9 @@ class FmResultSetParser extends AbstractParser
                     foreach ($xml->resultset[0]->record[$counterI]->relatedset[$counterIi]->record as $portal_row) {
                         $portal_cond_id = $this->rowsByRecId === true ? (int)$portal_row['record-id'] : $counterIii;
 
-                        $rows[$conditional_id][$portalname]['rows'][$portal_cond_id]['index'] = (int)$counterIii;
-                        $rows[$conditional_id][$portalname]['rows'][$portal_cond_id]['modid'] = (int)$portal_row['mod-id'];
-                        $rows[$conditional_id][$portalname]['rows'][$portal_cond_id]['recid'] = (int)$portal_row['record-id'];
+                        $portalRow['rows'][$portal_cond_id]['index'] = (int)$counterIii;
+                        $portalRow['rows'][$portal_cond_id]['modid'] = (int)$portal_row['mod-id'];
+                        $portalRow['rows'][$portal_cond_id]['recid'] = (int)$portal_row['record-id'];
 
                         // handle portal fields
                         foreach ($xml->resultset[0]->record[$counterI]->relatedset[$counterIi]->record[$counterIii]->field as $portal_field) {
@@ -106,10 +107,16 @@ class FmResultSetParser extends AbstractParser
 
                             // validate fieldnames on first row
                             $fieldNameIsValid = $counterIii === 0 ? StringUtils::fieldnameIsValid($portal_fieldname) : true;
-                            $rows[$conditional_id][$portalname]['rows'][$portal_cond_id][$portal_fieldname] = $portal_fielddata;
+                            $portalRow['rows'][$portal_cond_id][$portal_fieldname] = $portal_fielddata;
                         }
                         ++$counterIii;
                     }
+                    
+                    if (!isset($rows[$conditional_id][$portalname])) {
+                        $rows[$conditional_id][$portalname] = array();
+                    }
+                    $rows[$conditional_id][$portalname][] = $portalRow;
+                    
                     ++$counterIi;
                 }
             }

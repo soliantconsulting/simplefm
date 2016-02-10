@@ -193,14 +193,14 @@ There can be more than one portal on a layout. SimpleFM returns n portals for ev
 Assuming you leave rowsbyrecid as FALSE (the default setting), here is example array notation that would echo the the recid and the field value from the first portal row on the first record in the result set. Note that index, recid and modid are always properties on every parent and child row.
 
 ```
-echo $rows[0]['Portal_TO_Name']['rows'][0]['recid'].'<br>';    
-echo $rows[0]['Portal_TO_Name']['rows'][0]['myField'];
+echo $rows[0]['Portal_TO_Name'][0]['rows'][0]['recid'].'<br>';    
+echo $rows[0]['Portal_TO_Name'][0]['rows'][0]['myField'];
 ```
 
 If you set rowsbyrecid to TRUE on your adapter, here is syntax that would echo the data from a portal where the parent row has recid 154 and the child row has recid 335932.
 
 ```
-echo $rows[154]['Portal_TO_Name']['rows'][335932]['Related_TO_Name::fieldOnPortal'];
+echo $rows[154]['Portal_TO_Name'][0]['rows'][335932]['Related_TO_Name::fieldOnPortal'];
 ```
 
 It is left to you do decide which way you want the results indexed.

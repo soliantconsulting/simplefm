@@ -226,7 +226,8 @@ class AdapterTest extends \PHPUnit_Framework_TestCase
         $result = $this->adapterInstance->execute();
 
         $rows = $result->getRows();
-        $taskNameField = $rows[7676]['Tasks']['rows'][15001]['Task Name'];
+        $this->assertEquals(count($rows[7676]['Tasks']), 1);
+        $taskNameField = $rows[7676]['Tasks'][0]['rows'][15001]['Task Name'];
         $this->assertEquals($taskNameField, 'Review mock ups');
 
         // parsed with rowsbyrecid FALSE (the default behavior)
@@ -245,13 +246,13 @@ class AdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertNotInternalType('string', $repeatingField);
 
         $rows = $result->getRows();
-        $taskNameField = $rows[1]['Tasks']['rows'][2]['Task Name'];
+        $taskNameField = $rows[1]['Tasks'][0]['rows'][2]['Task Name'];
         $this->assertEquals($taskNameField, 'Complete sketches');
         $this->assertInternalType('string', $taskNameField);
         $this->assertNotInternalType('array', $taskNameField);
 
         $rows = $result->getRows();
-        $taskRepeatingField = $rows[1]['Tasks']['rows'][2]['Repeating Field'];
+        $taskRepeatingField = $rows[1]['Tasks'][0]['rows'][2]['Repeating Field'];
         $this->assertInternalType('array', $taskRepeatingField);
         $this->assertNotInternalType('string', $taskRepeatingField);
 
