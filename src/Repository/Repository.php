@@ -3,8 +3,13 @@ declare(strict_types=1);
 
 namespace Soliant\SimpleFM\Repository;
 
+use Assert\Assertion;
+use Soliant\SimpleFM\Authentication\Identity;
+use Soliant\SimpleFM\Authentication\IdentityHandlerInterface;
 use Soliant\SimpleFM\Client\ResultSet\ResultSetClient;
 use Soliant\SimpleFM\Connection\Command;
+use Soliant\SimpleFM\Repository\Exception\DomainException;
+use Soliant\SimpleFM\Repository\Exception\InvalidResultException;
 use Soliant\SimpleFM\Repository\Query\FindQuery;
 use SplObjectStorage;
 
@@ -31,6 +36,16 @@ final class Repository
     private $extraction;
 
     /**
+     * @var IdentityHandlerInterface|null
+     */
+    private $identityHandler;
+
+    /**
+     * @var Identity|null
+     */
+    private $identity;
+
+    /**
      * @var SplObjectStorage
      */
     private $managedEntities;
@@ -39,13 +54,27 @@ final class Repository
         ResultSetClient $resultSetClient,
         string $layout,
         HydrationInterface $hydration,
-        ExtractionInterface $extraction
+        ExtractionInterface $extraction,
+        IdentityHandlerInterface $identityHandler = null
     ) {
         $this->resultSetClient = $resultSetClient;
         $this->layout = $layout;
         $this->hydration = $hydration;
         $this->extraction = $extraction;
+        $this->identityHandler = $identityHandler;
         $this->managedEntities = new SplObjectStorage();
+    }
+
+    public function withIdentity(Identity $identity) : self
+    {
+        if (null === $this->identityHandler) {
+            throw DomainException::fromMissingIdentityHandler();
+        }
+
+        $gateway = new self();
+        $gateway->identity = $identity;
+
+        return $gateway;
     }
 
     public function find(int $recordId)
@@ -55,7 +84,7 @@ final class Repository
 
     public function findOneBy(array $search)
     {
-        $resultSet = $this->resultSetClient->execute(new Command(
+        $resultSet = $this->execute(new Command(
             $this->layout,
             $this->createSearchParameters($search) + ['-find' =>  null, '-max' => 1]
         ));
@@ -69,7 +98,7 @@ final class Repository
 
     public function findOneByQuery(FindQuery $query)
     {
-        $resultSet = $this->resultSetClient->execute(new Command(
+        $resultSet = $this->execute(new Command(
             $this->layout,
             $query->toParameters() + ['-findquery' =>  null, '-max' => 1]
         ));
@@ -83,7 +112,7 @@ final class Repository
 
     public function findAll(array $sort = [], int $limit = null, int $offset = null) : array
     {
-        $resultSet = $this->resultSetClient->execute(new Command(
+        $resultSet = $this->execute(new Command(
             $this->layout,
             (
                 $this->createSortParameters($sort)
@@ -97,7 +126,7 @@ final class Repository
 
     public function findBy(array $search, array $sort = [], int $limit = null, int $offset = null) : array
     {
-        $resultSet = $this->resultSetClient->execute(new Command(
+        $resultSet = $this->execute(new Command(
             $this->layout,
             (
                 $this->createSearchParameters($search)
@@ -112,7 +141,7 @@ final class Repository
 
     public function findByQuery(FindQuery $findQuery, array $sort = [], int $limit = null, int $offset = null) : array
     {
-        $resultSet = $this->resultSetClient->execute(new Command(
+        $resultSet = $this->execute(new Command(
             $this->layout,
             (
                 $findQuery->toParameters()
@@ -133,7 +162,7 @@ final class Repository
     public function update($entity)
     {
         if (!isset($this->managedEntities[$entity])) {
-            // @todo throw exception
+            throw DomainException::fromUnmanagedEntity($entity);
         }
 
         $this->persist($entity, '-edit', [
@@ -145,10 +174,10 @@ final class Repository
     public function delete($entity)
     {
         if (!isset($this->managedEntities[$entity])) {
-            // @todo throw exception
+            throw DomainException::fromUnmanagedEntity($entity);
         }
 
-        $this->resultSetClient->execute(new Command(
+        $this->execute(new Command(
             $this->layout,
             [
                 '-recid' => $this->managedEntities[$entity]['record-id'],
@@ -159,15 +188,15 @@ final class Repository
         unset($this->managedEntities[$entity]);
     }
 
-    private function persist($entity, string $mode, $additionalParameters)
+    private function persist($entity, string $mode, array $additionalParameters)
     {
-        $resultSet = $this->resultSetClient->execute(new Command(
+        $resultSet = $this->execute(new Command(
             $this->layout,
             $this->extraction->extract($entity) + $additionalParameters + [$mode => null]
         ));
 
         if (empty($resultSet)) {
-            // @todo throw exception
+            throw InvalidResultException::fromEmptyResultSet();
         }
 
         $this->hydration->hydrate($resultSet[0], $entity);
@@ -214,7 +243,7 @@ final class Repository
     private function createSortParameters(array $sort) : array
     {
         if (count($sort) > 9) {
-            // @todo throw exception
+            throw DomainException::fromTooManySortParameters(9, $sort);
         }
 
         $index = 1;
@@ -242,5 +271,19 @@ final class Repository
         }
 
         return $parameters;
+    }
+
+    private function execute(Command $command) : array
+    {
+        if (null === $this->identity) {
+            return $this->resultSetClient->execute($command);
+        }
+
+        Assertion::notNull($this->identityHandler);
+
+        return $this->resultSetClient->execute($command->withCredentials(
+            $this->identity->getUsername(),
+            $this->identityHandler->decryptPassword($this->identity)
+        ));
     }
 }

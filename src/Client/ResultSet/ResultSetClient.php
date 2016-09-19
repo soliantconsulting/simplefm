@@ -5,6 +5,7 @@ namespace Soliant\SimpleFM\Client\ResultSet;
 
 use DateTimeZone;
 use SimpleXMLElement;
+use Soliant\SimpleFM\Client\ResultSet\Exception\ParseException;
 use Soliant\SimpleFM\Client\Transformer\DateTimeTransformer;
 use Soliant\SimpleFM\Client\Transformer\DateTransformer;
 use Soliant\SimpleFM\Client\Transformer\NumberTransformer;
@@ -115,9 +116,9 @@ final class ResultSetClient
                 return new DateTimeTransformer($this->serverTimeZone);
 
             case 'container':
-                // @todo check how to transform
+                return new TextTransformer();
         }
 
-        // @todo throw exception
+        throw ParseException::fromInvalidFieldType((string) $fieldDefinition['result']);
     }
 }

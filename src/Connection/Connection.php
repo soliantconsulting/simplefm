@@ -39,12 +39,16 @@ final class Connection implements ConnectionInterface
         $uri = $this->uri->withPath($grammarPath);
         $response = $this->httpClient->sendRequest($this->buildRequest($command, $uri));
 
+        if (200 !== $response->getStatusCode()) {
+            throw InvalidResponse::fromUnsuccessfulResponse($response);
+        }
+
         $previousValue = libxml_use_internal_errors(true);
         $xml = simplexml_load_string($response->getBody());
         libxml_use_internal_errors($previousValue);
 
         if (false === $xml) {
-            throw Exception\InvalidResponse::fromXmlError(libxml_get_last_error());
+            throw InvalidResponse::fromXmlError(libxml_get_last_error());
         }
 
         return $xml;

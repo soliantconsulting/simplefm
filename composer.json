@@ -16,7 +16,8 @@
         "doctrine/common": "^2.2.0",
         "zendframework/zend-crypt": "^3.1",
         "php-http/httplug": "^1.1",
-        "litipk/php-bignumbers": "^0.7.3"
+        "litipk/php-bignumbers": "^0.7.3",
+        "beberlei/assert": "^2.6"
     },
     "require-dev": {
         "zendframework/zend-debug": "2.5.*",
