@@ -5,6 +5,7 @@ namespace Soliant\SimpleFM\Client\ResultSet;
 
 use DateTimeZone;
 use SimpleXMLElement;
+use Soliant\SimpleFM\Client\Exception\FileMakerException;
 use Soliant\SimpleFM\Client\ResultSet\Exception\ParseException;
 use Soliant\SimpleFM\Client\Transformer\DateTimeTransformer;
 use Soliant\SimpleFM\Client\Transformer\DateTransformer;
@@ -37,6 +38,15 @@ final class ResultSetClient
     public function execute(Command $command) : array
     {
         $xml = $this->connection->execute($command, self::GRAMMAR_PATH);
+        $errorCode = (int) $xml->error['code'];
+
+        if (8 === $errorCode || 401 === $errorCode) {
+            // "Empty result" or "No records match the request"
+            return [];
+        } elseif ($errorCode > 0) {
+            throw FileMakerException::fromErrorCode($errorCode);
+        }
+
         $metadata = $this->parseMetadata($xml->metadata[0]);
         $records = [];
 
