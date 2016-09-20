@@ -40,12 +40,12 @@ final class Connection implements ConnectionInterface
         $uri = $this->uri->withPath($grammarPath);
         $response = $this->httpClient->sendRequest($this->buildRequest($command, $uri));
 
-        if (200 !== $response->getStatusCode()) {
+        if (200 !== (int) $response->getStatusCode()) {
             throw InvalidResponseException::fromUnsuccessfulResponse($response);
         }
 
         $previousValue = libxml_use_internal_errors(true);
-        $xml = simplexml_load_string($response->getBody());
+        $xml = simplexml_load_string((string) $response->getBody());
         libxml_use_internal_errors($previousValue);
 
         if (false === $xml) {
@@ -63,9 +63,22 @@ final class Connection implements ConnectionInterface
         $body->write($parameters);
         $body->rewind();
 
-        return (new Request($uri, 'POST'))
+        $request = (new Request($uri->withUserInfo(''), 'POST'))
+            ->withAddedHeader('User-Agent', 'SimpleFM')
             ->withAddedHeader('Content-type', 'application/x-www-form-urlencoded')
             ->withAddedHeader('Content-length', (string) strlen($parameters))
             ->withBody($body);
+
+        $credentials = urldecode($uri->getUserInfo());
+
+        if ($command->hasCredentials()) {
+            $credentials = sprintf('%s:%s', $command->getUsername(), $command->getPassword());
+        }
+
+        if ('' === $credentials) {
+            return $request;
+        }
+
+        return $request->withAddedHeader('Authorization', sprintf('Basic %s', base64_encode($credentials)));
     }
 }

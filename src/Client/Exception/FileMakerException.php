@@ -326,7 +326,7 @@ final class FileMakerException extends RuntimeException implements ExceptionInte
 
     public static function fromErrorCode(int $errorCode) : self
     {
-        if (!array_key_exists($errorCode, self::$errorReasons)) {
+        if (array_key_exists($errorCode, self::$errorReasons)) {
             $reason = self::$errorReasons[$errorCode];
         } else {
             $reason = self::$errorReasons[-1];
