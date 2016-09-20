@@ -48,6 +48,8 @@ final class Command
         $command = clone $this;
         $command->username = $username;
         $command->password = $password;
+
+        return $command;
     }
 
     public function hasCredentials()

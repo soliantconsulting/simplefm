@@ -57,6 +57,27 @@ final class ResultSetClient
         return $records;
     }
 
+    public function quoteString(string $string) : string
+    {
+        return strtr($string, [
+            '\\' => '\\\\',
+            '=' => '\\',
+            '!' => '\\!',
+            '<' => '\\<',
+            '≤' => '\\≤',
+            '>' => '\\>',
+            '≥' => '\\≥',
+            '…' => '\\…',
+            '//' => '\\//',
+            '?' => '\\?',
+            '@' => '\\@',
+            '#' => '\\#',
+            '*' => '\\*',
+            '"' => '\\"',
+            '~' => '\\~'
+        ]);
+    }
+
     private function parseRecord(SimpleXMLElement $recordData, array $metadata) : array
     {
         $record = [

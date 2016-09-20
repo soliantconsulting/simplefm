@@ -47,7 +47,7 @@ final class Authenticator
         try {
             $resultSet = $this->resultSetClient->execute(
                 (new Command($this->identityLayout, [
-                    $this->usernameField => '==' . str_replace('@', '\@', $username),
+                    $this->usernameField => '==' . $this->resultSetClient->quoteString($username),
                     '-find' => null,
                 ]))->withCredentials($username, $password)
             );

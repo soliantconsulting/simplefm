@@ -29,7 +29,7 @@ final class Result
 
     public function isSuccess() : bool
     {
-        return null === $this->identity;
+        return null !== $this->identity;
     }
 
     public function getIdentity() : Identity

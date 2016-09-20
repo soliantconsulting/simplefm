@@ -188,6 +188,11 @@ final class Repository
         unset($this->managedEntities[$entity]);
     }
 
+    public function quoteString(string $string) : string
+    {
+        return $this->resultSetClient->quoteString($string);
+    }
+
     private function persist($entity, string $mode, array $additionalParameters = [])
     {
         $resultSet = $this->execute(new Command(
@@ -234,7 +239,7 @@ final class Repository
         $searchParameters = [];
 
         foreach ($search as $field => $value) {
-            $searchParameters[$field] = str_replace('@', '\@', $value);
+            $searchParameters[$field] = $this->quoteString($value);
         }
 
         return $searchParameters;
