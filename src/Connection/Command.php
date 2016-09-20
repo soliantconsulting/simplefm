@@ -26,11 +26,11 @@ final class Command
 
     public function __construct(string $layout, array $parameters)
     {
-        if (array_key_exists($parameters, '-db')) {
+        if (array_key_exists('-db', $parameters)) {
             throw DomainException::fromDisallowedParameter('-db');
         }
 
-        if (array_key_exists($parameters, '-lay')) {
+        if (array_key_exists('-lay', $parameters)) {
             throw DomainException::fromDisallowedParameter('-lay');
         }
 
