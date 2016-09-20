@@ -13,9 +13,9 @@ final class InvalidResponseException extends RuntimeException implements Excepti
     {
         return new self(sprintf(
             'The FileMaker server responded with an unexpected error code: %d %s',
-            $response->getStatusCode(),
+            (int) $response->getStatusCode(),
             $response->getReasonPhrase()
-        ), $response->getStatusCode());
+        ), (int) $response->getStatusCode());
     }
 
     public static function fromXmlError(LibXMLError $error) : self

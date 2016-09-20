@@ -57,12 +57,15 @@ final class Connection implements ConnectionInterface
 
     private function buildRequest(Command $command, UriInterface $uri) : RequestInterface
     {
+        $parameters = sprintf('-db=%s&%s', urlencode($this->database), $command);
+
         $body = new Stream('php://temp', 'wb+');
-        $body->write(sprintf('-db=%s&%s', urlencode($this->database), $command));
+        $body->write($parameters);
         $body->rewind();
 
         return (new Request($uri, 'POST'))
             ->withAddedHeader('Content-type', 'application/x-www-form-urlencoded')
+            ->withAddedHeader('Content-length', (string) strlen($parameters))
             ->withBody($body);
     }
 }
