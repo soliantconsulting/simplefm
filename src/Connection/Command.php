@@ -35,7 +35,7 @@ final class Command
         }
 
         foreach ($parameters as $value) {
-            if (!$value instanceof DateTimeInterface && !is_scalar($value)) {
+            if (!$value instanceof DateTimeInterface && !is_scalar($value) && null !== $value) {
                 throw DomainException::fromInvalidValue($value);
             }
         }
