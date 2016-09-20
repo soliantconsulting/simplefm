@@ -82,11 +82,11 @@ final class Command
             }
 
             if (null === $value || '' === $value) {
-                $parts[] = urlencode($name);
+                $parts[] = urlencode((string) $name);
                 continue;
             }
 
-            $parts[] = sprintf('%s=%s', urlencode($name), urlencode($value));
+            $parts[] = sprintf('%s=%s', urlencode((string) $name), urlencode((string) $value));
         }
 
         return implode('&', $parts);
