@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Soliant\SimpleFM\Client\Transformer;
+namespace Soliant\SimpleFM\Client\ResultSet\Transformer;
 
 final class TextTransformer
 {

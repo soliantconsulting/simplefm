@@ -7,11 +7,11 @@ use DateTimeZone;
 use SimpleXMLElement;
 use Soliant\SimpleFM\Client\Exception\FileMakerException;
 use Soliant\SimpleFM\Client\ResultSet\Exception\ParseException;
-use Soliant\SimpleFM\Client\Transformer\DateTimeTransformer;
-use Soliant\SimpleFM\Client\Transformer\DateTransformer;
-use Soliant\SimpleFM\Client\Transformer\NumberTransformer;
-use Soliant\SimpleFM\Client\Transformer\TextTransformer;
-use Soliant\SimpleFM\Client\Transformer\TimeTransformer;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\DateTimeTransformer;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\DateTransformer;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\NumberTransformer;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\TextTransformer;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\TimeTransformer;
 use Soliant\SimpleFM\Connection\Command;
 use Soliant\SimpleFM\Connection\ConnectionInterface;
 
@@ -50,7 +50,7 @@ final class ResultSetClient
         $metadata = $this->parseMetadata($xml->metadata[0]);
         $records = [];
 
-        foreach ($this->xml->resultset[0]->record as $record) {
+        foreach ($xml->resultset[0]->record as $record) {
             $records[] = $this->parseRecord($record, $metadata);
         }
 
@@ -64,7 +64,7 @@ final class ResultSetClient
             'mod-id' => (int) $recordData['mod-id'],
         ];
 
-        foreach ($recordData['field'] as $fieldData) {
+        foreach ($recordData->field as $fieldData) {
             $fieldName = (string) $fieldData['name'];
 
             if (!$metadata[$fieldData]['repeatable']) {
@@ -74,17 +74,17 @@ final class ResultSetClient
 
             $record[$fieldName] = [];
 
-            foreach ($fieldData['data'] as $data) {
+            foreach ($fieldData->data as $data) {
                 $record[$fieldName][] = $metadata[$fieldName]['transformer']((string) $data);
             }
         }
 
-        if (isset($recordData['relatedset'])) {
-            foreach ($recordData['relatedset'] as $relatedSetData) {
+        if (isset($recordData->relatedset)) {
+            foreach ($recordData->relatedset as $relatedSetData) {
                 $relatedSetName = (string) $relatedSetData['table'];
                 $record[$relatedSetName] = [];
 
-                foreach ($relatedSetData['record'] as $relatedSetRecordData) {
+                foreach ($relatedSetData->record as $relatedSetRecordData) {
                     $record[$relatedSetName][] = (int) $relatedSetRecordData['record-id'];
                 }
             }
@@ -97,7 +97,7 @@ final class ResultSetClient
     {
         $metadata = [];
 
-        foreach ($xml['field-definition'] as $fieldDefinition) {
+        foreach ($xml->{'field-definition'} as $fieldDefinition) {
             $metadata[(string) $fieldDefinition['name']] = [
                 'repeatable' => ((int) $fieldDefinition['max-repeat']) > 1,
                 'transformer' => $this->getFieldTransformer($fieldDefinition),
