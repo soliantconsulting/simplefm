@@ -188,7 +188,7 @@ final class Repository
         unset($this->managedEntities[$entity]);
     }
 
-    private function persist($entity, string $mode, array $additionalParameters)
+    private function persist($entity, string $mode, array $additionalParameters = [])
     {
         $resultSet = $this->execute(new Command(
             $this->layout,
