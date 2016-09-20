@@ -68,7 +68,7 @@ final class ResultSetClient
             $fieldName = (string) $fieldData['name'];
 
             if (!$metadata[$fieldName]['repeatable']) {
-                $record[$fieldName] = $metadata[$fieldName]['transformer']((string) $fieldData['data']);
+                $record[$fieldName] = $metadata[$fieldName]['transformer']((string) $fieldData->data);
                 continue;
             }
 

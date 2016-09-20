@@ -199,7 +199,7 @@ final class Repository
             throw InvalidResultException::fromEmptyResultSet();
         }
 
-        $this->hydration->hydrate($resultSet[0], $entity);
+        $this->hydration->hydrateExistingEntity($resultSet[0], $entity);
         $this->addOrUpdateManagedEntity($resultSet[0]['record-id'], $resultSet[0]['mod-id'], $entity);
     }
 
@@ -224,7 +224,7 @@ final class Repository
 
     private function createEntity(array $record)
     {
-        $entity = $this->hydration->hydrate($record);
+        $entity = $this->hydration->hydrateNewEntity($record);
         $this->addOrUpdateManagedEntity($record['record-id'], $record['mod-id'], $entity);
         return $entity;
     }

@@ -5,5 +5,7 @@ namespace Soliant\SimpleFM\Repository;
 
 interface HydrationInterface
 {
-    public function hydrate(array $data, $object = null);
+    public function hydrateNewEntity(array $data);
+
+    public function hydrateExistingEntity(array $data, $entity);
 }
