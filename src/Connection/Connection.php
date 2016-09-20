@@ -7,6 +7,7 @@ use Http\Client\HttpClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\UriInterface;
 use SimpleXMLElement;
+use Soliant\SimpleFM\Connection\Exception\InvalidResponseException;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
 
@@ -40,7 +41,7 @@ final class Connection implements ConnectionInterface
         $response = $this->httpClient->sendRequest($this->buildRequest($command, $uri));
 
         if (200 !== $response->getStatusCode()) {
-            throw InvalidResponse::fromUnsuccessfulResponse($response);
+            throw InvalidResponseException::fromUnsuccessfulResponse($response);
         }
 
         $previousValue = libxml_use_internal_errors(true);
@@ -48,7 +49,7 @@ final class Connection implements ConnectionInterface
         libxml_use_internal_errors($previousValue);
 
         if (false === $xml) {
-            throw InvalidResponse::fromXmlError(libxml_get_last_error());
+            throw InvalidResponseException::fromXmlError(libxml_get_last_error());
         }
 
         return $xml;
