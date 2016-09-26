@@ -9,6 +9,6 @@ final class InvalidArgumentException extends PhpInvalidArgumentException impleme
 {
     public static function fromEmptyQueryParameters() : self
     {
-       return new self('Query parameters cannot be empty');
+        return new self('Query parameters cannot be empty');
     }
 }

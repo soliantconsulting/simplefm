@@ -36,8 +36,7 @@ final class Command
         }
 
         foreach ($parameters as $value) {
-            if (
-                !$value instanceof DateTimeInterface
+            if (!$value instanceof DateTimeInterface
                 && !$value instanceof Decimal
                 && !is_scalar($value)
                 && null !== $value
