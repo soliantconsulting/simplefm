@@ -26,7 +26,7 @@ matrix:
 before_install:
   - if [[ $EXECUTE_TEST_COVERALLS != 'true' ]]; then phpenv config-rm xdebug.ini || return 0 ; fi
   - composer self-update
-  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then composer require --dev --no-update satooshi/php-coveralls:dev-master ; fi
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then composer require --dev --no-update satooshi/php-coveralls:^1.0.0 ; fi
   - if [[ $EXECUTE_TEST_CODECLIMATE == 'true' ]]; then composer require --dev --no-update codeclimate/php-test-reporter:^0.3.2 ; fi
 
 install:
