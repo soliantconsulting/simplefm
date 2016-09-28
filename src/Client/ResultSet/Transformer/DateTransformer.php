@@ -26,7 +26,7 @@ final class DateTransformer
         );
 
         if (false === $dateTime) {
-            throw DateTimeException::fromDateTimeError($value, DateTimeImmutable::getLastErrors());
+            throw Exception\DateTimeException::fromDateTimeError($value, DateTimeImmutable::getLastErrors());
         }
 
         return $dateTime;

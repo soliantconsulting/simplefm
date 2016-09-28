@@ -15,7 +15,7 @@ final class ValueList
      */
     private $values;
 
-    public function __construct(string$name, Value ...$values)
+    public function __construct(string $name, Value ...$values)
     {
         $this->name = $name;
         $this->values = $values;

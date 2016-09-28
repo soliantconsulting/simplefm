@@ -9,6 +9,7 @@ final class DateTimeException extends DomainException implements ExceptionInterf
 {
     public static function fromDateTimeError(string $value, array $lastErrors) : self
     {
-        return new self(sprintf('Could not parse "%s", reason: %s', $value, $lastErrors['errors'][0]));
+        $message = isset($lastErrors['errors'][0]) ? $lastErrors['errors'][0] : 'Unexpected data found.';
+        return new self(sprintf('Could not parse "%s", reason: %s', $value, $message));
     }
 }
