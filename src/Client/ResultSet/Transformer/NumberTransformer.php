@@ -1,11 +1,11 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Soliant\SimpleFM\Client\ResultSet\Transformer;
 
 use InvalidArgumentException;
 use Litipk\BigNumbers\Decimal;
-use Soliant\SimpleFM\Client\ResultSet\Exception\ParseException;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\Exception\DecimalException;
 
 final class NumberTransformer
 {
@@ -20,16 +20,13 @@ final class NumberTransformer
         }
 
         /**
-         * \Litipk\Exceptions\InvalidArgumentTypeException is a subclass of \InvalidArgumentException, but for some
-         * reason, they can throw both. So we're catching the superclass, and rethrowing a ParseException with more
-         * useful information about the problem.
+         * Litipk\Exceptions\InvalidArgumentTypeException is a subclass of InvalidArgumentException, but for some
+         * reason, they might throw both. We're catching the superclass, and throwing our own DecimalException.
          */
         try {
             $return = Decimal::fromString($value);
         } catch (InvalidArgumentException $e) {
-            throw new ParseException(
-                '"' . $value . '" must be a string that represents uniquely a float point number.'
-            );
+            throw DecimalException::fromInvalidString($value);
         }
         return $return;
     }

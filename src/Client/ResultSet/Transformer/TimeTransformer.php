@@ -1,10 +1,11 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Soliant\SimpleFM\Client\ResultSet\Transformer;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\Exception\DateTimeException;
 
 final class TimeTransformer
 {
@@ -26,7 +27,7 @@ final class TimeTransformer
         );
 
         if (false === $dateTime) {
-            throw Exception\DateTimeException::fromDateTimeError($value, DateTimeImmutable::getLastErrors());
+            throw DateTimeException::fromDateTimeError($value, DateTimeImmutable::getLastErrors());
         }
 
         return $dateTime;

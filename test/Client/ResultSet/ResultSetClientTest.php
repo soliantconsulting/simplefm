@@ -11,6 +11,7 @@ use Soliant\SimpleFM\Client\Exception\FileMakerException;
 use Soliant\SimpleFM\Client\ResultSet\Exception\ParseException;
 use Soliant\SimpleFM\Client\ResultSet\ResultSetClient;
 use Soliant\SimpleFM\Client\ResultSet\Transformer\Exception\DateTimeException;
+use Soliant\SimpleFM\Client\ResultSet\Transformer\Exception\DecimalException;
 use Soliant\SimpleFM\Connection\Command;
 use Soliant\SimpleFM\Connection\ConnectionInterface;
 
@@ -206,7 +207,7 @@ final class ResultSetClientTest extends TestCase
 
     public function testInvalidFieldTransformerTypeRepeatingNumber()
     {
-        $this->expectException(ParseException::class);
+        $this->expectException(DecimalException::class);
         $this->expectExceptionMessage(
             '"non-number string" must be a string that represents uniquely a float point number.'
         );
