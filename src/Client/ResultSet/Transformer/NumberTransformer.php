@@ -27,7 +27,9 @@ final class NumberTransformer
         try {
             $return = Decimal::fromString($value);
         } catch (InvalidArgumentException $e) {
-            throw new ParseException('"' . $value . '" must be a string that represents uniquely a float point number.');
+            throw new ParseException(
+                '"' . $value . '" must be a string that represents uniquely a float point number.'
+            );
         }
         return $return;
     }
