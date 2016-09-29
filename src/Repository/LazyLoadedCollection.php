@@ -50,7 +50,7 @@ final class LazyLoadedCollection implements IteratorAggregate, Countable
     public function first()
     {
         $iterator = $this->getIterator();
-        return reset($iterator);
+        return reset($iterator) ?: null;
     }
 
     public function count() : int
