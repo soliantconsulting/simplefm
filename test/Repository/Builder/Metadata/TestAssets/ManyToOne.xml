@@ -2,7 +2,8 @@
 <entity
     xmlns="uri:soliantconsulting.com:simplefm:entity-metadata"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="../../../../../documentation/entity-metadata.xsd"
+    xsi:schemaLocation="uri:soliantconsulting.com:simplefm:entity-metadata
+        https://soliantconsulting.github.io/SimpleFM/xsd/simple-fm-1-0.xml"
     class-name="ManyToOne"
     layout="many-to-one-layout"
 >
