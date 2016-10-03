@@ -102,8 +102,8 @@ final class Entity
 
     private function validateArray(array $array, string $expectedClassName)
     {
-        Assertion::count(0, array_filter($array, function ($metadata) use ($expectedClassName) {
+        Assertion::count(array_filter($array, function ($metadata) use ($expectedClassName) : bool {
             return !$metadata instanceof $expectedClassName;
-        }));
+        }), 0, sprintf('At least one element in array is not an instance of %s', $expectedClassName));
     }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<entity
+    xmlns="uri:soliantconsulting.com:simplefm:entity-metadata"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="../../../../../documentation/entity-metadata.xsd"
+    class-name="Empty"
+    layout="empty-layout"
+/>

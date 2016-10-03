@@ -47,7 +47,7 @@ final class OneToOne
         $this->propertyName = $propertyName;
         $this->targetEntity = $targetEntity;
         $this->isOwningSide = $isOwningSide;
-        $this->joinFieldName = $joinFieldName;
+        $this->joinFieldName = $isOwningSide ? $joinFieldName : null;
     }
 
     public function getFieldName() : string

@@ -12,8 +12,8 @@ final class InvalidFileException extends RuntimeException implements ExceptionIn
         return new self(sprintf('File "%s" for entity "%s" does not exist', $path, $entityClassName));
     }
 
-    public static function fromInvalidFile(string $path, string $entityClassName) : self
+    public static function fromInvalidFile(string $path) : self
     {
-        return new self(sprintf('File "%s" is not valid', $path, $entityClassName));
+        return new self(sprintf('File "%s" is not valid', $path));
     }
 }

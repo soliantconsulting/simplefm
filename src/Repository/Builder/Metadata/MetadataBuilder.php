@@ -7,6 +7,7 @@ use Assert\Assertion;
 use DOMDocument;
 use SimpleXMLElement;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Exception\InvalidFileException;
+use Soliant\SimpleFM\Repository\Builder\Metadata\Exception\InvalidTypeException;
 use Soliant\SimpleFM\Repository\Builder\Type\DateTimeType;
 use Soliant\SimpleFM\Repository\Builder\Type\DecimalType;
 use Soliant\SimpleFM\Repository\Builder\Type\FloatType;
@@ -31,9 +32,9 @@ final class MetadataBuilder implements MetadataBuilderInterface
     public function __construct(string $xmlFolder, array $additionalTypes = [])
     {
         if (!empty($additionalTypes)) {
-            Assertion::count(0, array_filter($additionalTypes, function ($type) {
+            Assertion::count(array_filter($additionalTypes, function ($type) : bool {
                 return !$type instanceof TypeInterface;
-            }));
+            }), 0, sprintf('At least one element in array is not an instance of %s', TypeInterface::class));
         }
 
         $this->xmlFolder = $xmlFolder;
@@ -70,49 +71,65 @@ final class MetadataBuilder implements MetadataBuilderInterface
         $manyToOne = [];
         $oneToOne = [];
 
-        foreach ($xml->field as $field) {
-            $fields[] = new Field(
-                (string) $field['name'],
-                (string) $field['property'],
-                (string) $field['type'],
-                (isset($field['repeatable']) && (string) $field['type'] === 'true')
-            );
+        if (isset($xml->field)) {
+            foreach ($xml->field as $field) {
+                $type = (string) $field['type'];
+
+                if (!array_key_exists($type, $this->types)) {
+                    throw InvalidTypeException::fromNonExistentType($type);
+                }
+
+                $fields[] = new Field(
+                    (string) $field['name'],
+                    (string) $field['property'],
+                    $this->types[$type],
+                    (isset($field['repeatable']) && (string) $field['repeatable'] === 'true')
+                );
+            }
         }
 
-        foreach ($xml->{'one-to-many'} as $relation) {
-            $oneToMany[] = new OneToMany(
-                (string) $relation['name'],
-                (string) $relation['property'],
-                (string) $relation['target-entity']
-            );
+        if (isset($xml->{'one-to-many'})) {
+            foreach ($xml->{'one-to-many'} as $relation) {
+                $oneToMany[] = new OneToMany(
+                    (string) $relation['name'],
+                    (string) $relation['property'],
+                    (string) $relation['target-entity']
+                );
+            }
         }
 
-        foreach ($xml->{'many-to-one'} as $relation) {
-            $manyToOne[] = new ManyToOne(
-                (string) $relation['name'],
-                (string) $relation['property'],
-                (string) $relation['target-entity'],
-                (string) $relation['join-field-name']
-            );
+        if (isset($xml->{'many-to-one'})) {
+            foreach ($xml->{'many-to-one'} as $relation) {
+                $manyToOne[] = new ManyToOne(
+                    (string) $relation['name'],
+                    (string) $relation['property'],
+                    (string) $relation['target-entity'],
+                    (string) $relation['join-field-name']
+                );
+            }
         }
 
-        foreach ($xml->{'one-to-one-owning'} as $relation) {
-            $oneToOne[] = new OneToOne(
-                (string) $relation['name'],
-                (string) $relation['property'],
-                (string) $relation['target-entity'],
-                true,
-                (string) $relation['join-field-name']
-            );
+        if (isset($xml->{'one-to-one-owning'})) {
+            foreach ($xml->{'one-to-one-owning'} as $relation) {
+                $oneToOne[] = new OneToOne(
+                    (string) $relation['name'],
+                    (string) $relation['property'],
+                    (string) $relation['target-entity'],
+                    true,
+                    (string) $relation['join-field-name']
+                );
+            }
         }
 
-        foreach ($xml->{'one-to-one-inverse'} as $relation) {
-            $oneToOne[] = new OneToOne(
-                (string) $relation['name'],
-                (string) $relation['property'],
-                (string) $relation['target-entity'],
-                false
-            );
+        if (isset($xml->{'one-to-one-inverse'})) {
+            foreach ($xml->{'one-to-one-inverse'} as $relation) {
+                $oneToOne[] = new OneToOne(
+                    (string) $relation['name'],
+                    (string) $relation['property'],
+                    (string) $relation['target-entity'],
+                    false
+                );
+            }
         }
 
         return new Entity(
@@ -132,11 +149,10 @@ final class MetadataBuilder implements MetadataBuilderInterface
         $loadResult = $xml->load($xmlPath);
 
         if (!$loadResult || !$xml->schemaValidate(self::SCHEMA_PATH)) {
-            throw InvalidFileException::fromNonExistentFile($xmlPath);
+            throw InvalidFileException::fromInvalidFile($xmlPath);
         }
 
         libxml_use_internal_errors($previousUseInternalErrors);
-
         return simplexml_import_dom($xml);
     }
 
