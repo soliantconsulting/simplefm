@@ -10,13 +10,13 @@ final class DateTimeType implements TypeInterface
 {
     public function fromFileMakerValue($value)
     {
-        Assertion::isInstanceOf(DateTimeInterface::class);
+        Assertion::isInstanceOf($value, DateTimeInterface::class);
         return $value;
     }
 
     public function toFileMakerValue($value)
     {
-        Assertion::isInstanceOf(DateTimeInterface::class);
+        Assertion::isInstanceOf($value, DateTimeInterface::class);
         return $value;
     }
 }

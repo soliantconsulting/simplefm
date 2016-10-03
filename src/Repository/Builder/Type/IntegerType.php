@@ -10,13 +10,13 @@ final class IntegerType implements TypeInterface
 {
     public function fromFileMakerValue($value)
     {
-        Assertion::isInstanceOf(Decimal::class);
+        Assertion::isInstanceOf($value, Decimal::class);
         return $value->asInteger();
     }
 
     public function toFileMakerValue($value)
     {
         Assertion::integer($value);
-        return $value;
+        return Decimal::fromInteger($value);
     }
 }

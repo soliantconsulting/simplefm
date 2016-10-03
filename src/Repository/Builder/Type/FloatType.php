@@ -10,13 +10,13 @@ final class FloatType implements TypeInterface
 {
     public function fromFileMakerValue($value)
     {
-        Assertion::isInstanceOf(Decimal::class);
+        Assertion::isInstanceOf($value, Decimal::class);
         return $value->asFloat();
     }
 
     public function toFileMakerValue($value)
     {
         Assertion::float($value);
-        return $value;
+        return Decimal::fromFloat($value);
     }
 }

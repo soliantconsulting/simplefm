@@ -10,13 +10,13 @@ final class DecimalType implements TypeInterface
 {
     public function fromFileMakerValue($value)
     {
-        Assertion::isInstanceOf(Decimal::class);
+        Assertion::isInstanceOf($value, Decimal::class);
         return $value;
     }
 
     public function toFileMakerValue($value)
     {
-        Assertion::isInstanceOf(Decimal::class);
+        Assertion::isInstanceOf($value, Decimal::class);
         return $value;
     }
 }
