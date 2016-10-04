@@ -17,7 +17,7 @@ use Soliant\SimpleFM\Repository\Builder\Type\TypeInterface;
 
 final class MetadataBuilder implements MetadataBuilderInterface
 {
-    const SCHEMA_PATH = __DIR__ . '/../../../../documentation/entity-metadata.xsd';
+    const SCHEMA_PATH = __DIR__ . '/../../../../docs/xsd/entity-metadata-5-0.xsd';
 
     /**
      * @var string
@@ -104,7 +104,7 @@ final class MetadataBuilder implements MetadataBuilderInterface
                     (string) $relation['name'],
                     (string) $relation['property'],
                     (string) $relation['target-entity'],
-                    (string) $relation['join-field-name']
+                    (string) $relation['target-property-name']
                 );
             }
         }
@@ -116,7 +116,7 @@ final class MetadataBuilder implements MetadataBuilderInterface
                     (string) $relation['property'],
                     (string) $relation['target-entity'],
                     true,
-                    (string) $relation['join-field-name']
+                    (string) $relation['target-property-name']
                 );
             }
         }
