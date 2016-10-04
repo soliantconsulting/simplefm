@@ -6,6 +6,7 @@ namespace Soliant\SimpleFM\Repository\Builder;
 use Assert\Assertion;
 use ReflectionClass;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Entity;
+use Soliant\SimpleFM\Repository\Builder\Metadata\OneToOne;
 use Soliant\SimpleFM\Repository\ExtractionInterface;
 
 final class MetadataExtraction implements ExtractionInterface
@@ -54,17 +55,23 @@ final class MetadataExtraction implements ExtractionInterface
         );
 
         foreach ($toOne as $relationMetadata) {
-            $relation = $data[$fieldMetadata->getFieldName()] = $this->getProperty(
+            $relation = $this->getProperty(
                 $reflectionClass,
                 $entity,
-                $fieldMetadata->getPropertyName()
+                $relationMetadata->getPropertyName()
             );
+
+            if (null === $relation) {
+                $data[$relationMetadata->getFieldName()] = null;
+                continue;
+            }
+
             Assertion::isInstanceOf($relation, $relationMetadata->getTargetEntity());
 
             $data[$relationMetadata->getFieldName()] = $this->getProperty(
                 new ReflectionClass($relation),
-                $entity,
-                $relationMetadata->getJoinField()
+                $relation,
+                $relationMetadata->getTargetPropertyName()
             );
         }
 

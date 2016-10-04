@@ -30,24 +30,24 @@ final class OneToOne
     /**
      * @var string
      */
-    private $joinFieldName;
+    private $targetPropertyName;
 
     public function __construct(
         string $fieldName,
         string $propertyName,
         string $targetEntity,
         bool $isOwningSide,
-        string $joinFieldName = null
+        string $targetPropertyName = null
     ) {
         if ($isOwningSide) {
-            Assertion::notNull($joinFieldName);
+            Assertion::notNull($targetPropertyName);
         }
 
         $this->fieldName = $fieldName;
         $this->propertyName = $propertyName;
         $this->targetEntity = $targetEntity;
         $this->isOwningSide = $isOwningSide;
-        $this->joinFieldName = $isOwningSide ? $joinFieldName : null;
+        $this->targetPropertyName = $isOwningSide ? $targetPropertyName : null;
     }
 
     public function getFieldName() : string
@@ -70,9 +70,9 @@ final class OneToOne
         return $this->isOwningSide;
     }
 
-    public function getJoinFieldName() : string
+    public function getTargetPropertyName() : string
     {
-        Assertion::notNull($this->joinFieldName);
-        return $this->joinFieldName;
+        Assertion::notNull($this->targetPropertyName);
+        return $this->targetPropertyName;
     }
 }

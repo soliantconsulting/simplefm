@@ -12,7 +12,7 @@ use Soliant\SimpleFM\Repository\LazyLoadedCollection;
 final class MetadataHydration implements HydrationInterface
 {
     /**
-     * @var RepositoryBuilder
+     * @var RepositoryBuilderInterface
      */
     private $repositoryBuilder;
 
@@ -21,7 +21,7 @@ final class MetadataHydration implements HydrationInterface
      */
     private $entityMetadata;
 
-    public function __construct(RepositoryBuilder $repositoryBuilder, Entity $entityMetadata)
+    public function __construct(RepositoryBuilderInterface $repositoryBuilder, Entity $entityMetadata)
     {
         $this->repositoryBuilder = $repositoryBuilder;
         $this->entityMetadata = $entityMetadata;
@@ -63,10 +63,10 @@ final class MetadataHydration implements HydrationInterface
             $this->setProperty(
                 $reflectionClass,
                 $entity,
-                $fieldMetadata->getPropertyName(),
+                $relationMetadata->getPropertyName(),
                 new LazyLoadedCollection(
-                    $this->repositoryBuilder->buildRepository($relationMetadata->getClassName()),
-                    $data[$fieldMetadata->getFieldName()]
+                    $this->repositoryBuilder->buildRepository($relationMetadata->getTargetEntity()),
+                    $data[$relationMetadata->getFieldName()]
                 )
             );
         }
@@ -77,10 +77,10 @@ final class MetadataHydration implements HydrationInterface
             $this->setProperty(
                 $reflectionClass,
                 $entity,
-                $fieldMetadata->getPropertyName(),
+                $relationMetadata->getPropertyName(),
                 (new LazyLoadedCollection(
-                    $this->repositoryBuilder->buildRepository($relationMetadata->getClassName()),
-                    $data[$fieldMetadata->getFieldName()]
+                    $this->repositoryBuilder->buildRepository($relationMetadata->getTargetEntity()),
+                    $data[$relationMetadata->getFieldName()]
                 ))->first()
             );
         }

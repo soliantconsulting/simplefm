@@ -23,18 +23,18 @@ final class ManyToOne
     /**
      * @var string
      */
-    private $joinFieldName;
+    private $targetPropertyName;
 
     public function __construct(
         string $fieldName,
         string $propertyName,
         string $targetEntity,
-        string $joinFieldName
+        string $targetPropertyName
     ) {
         $this->fieldName = $fieldName;
         $this->propertyName = $propertyName;
         $this->targetEntity = $targetEntity;
-        $this->joinFieldName = $joinFieldName;
+        $this->targetPropertyName = $targetPropertyName;
     }
 
     public function getFieldName() : string
@@ -52,8 +52,8 @@ final class ManyToOne
         return $this->targetEntity;
     }
 
-    public function getJoinFieldName() : string
+    public function getTargetPropertyName() : string
     {
-        return $this->joinFieldName;
+        return $this->targetPropertyName;
     }
 }
