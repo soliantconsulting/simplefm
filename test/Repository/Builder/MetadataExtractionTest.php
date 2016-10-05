@@ -79,7 +79,8 @@ final class MetadataExtractionTest extends TestCase
 
     public function testManyToOneOwningExtractionWithoutEntity()
     {
-        $childEntity = new class {};
+        $childEntity = new class {
+        };
         $entity = new class {
             public $baz = null;
         };
@@ -112,7 +113,8 @@ final class MetadataExtractionTest extends TestCase
 
     public function testOneToOneOwningExtractionWithoutEntity()
     {
-        $childEntity = new class {};
+        $childEntity = new class {
+        };
         $entity = new class {
             public $baz = null;
         };
