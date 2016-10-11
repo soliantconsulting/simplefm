@@ -8,6 +8,7 @@ use Exception;
 use ReflectionClass;
 use Soliant\SimpleFM\Repository\Builder\Exception\ExtractionException;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Entity;
+use Soliant\SimpleFM\Repository\Builder\Metadata\ManyToOne;
 use Soliant\SimpleFM\Repository\Builder\Metadata\OneToOne;
 use Soliant\SimpleFM\Repository\ExtractionInterface;
 
@@ -74,10 +75,15 @@ final class MetadataExtraction implements ExtractionInterface
             }
         }
 
-        $toOne = $metadata->getManyToOne() + array_filter(
+        $toOne = array_filter(
+            $metadata->getManyToOne(),
+            function (ManyToOne $manyToOneMetadata) {
+                return !$manyToOneMetadata->isReadOnly();
+            }
+        ) + array_filter(
             $metadata->getOneToOne(),
             function (OneToOne $oneToOneMetadata) {
-                return $oneToOneMetadata->isOwningSide();
+                return $oneToOneMetadata->isOwningSide() && !$oneToOneMetadata->isReadOnly();
             }
         );
 
