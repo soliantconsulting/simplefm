@@ -3,8 +3,8 @@ declare(strict_types = 1);
 
 namespace SoliantTest\SimpleFM\Repository\Builder;
 
-use Assert\InvalidArgumentException;
 use PHPUnit_Framework_TestCase as TestCase;
+use Soliant\SimpleFM\Repository\Builder\Exception\ExtractionException;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Embeddable;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Entity;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Field;
@@ -69,7 +69,7 @@ final class MetadataExtractionTest extends TestCase
         ], [], [], [], []);
 
         $extraction = new MetadataExtraction($entityMetadata);
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ExtractionException::class);
         $this->expectExceptionMessage('is not an array');
         $extraction->extract($entity);
     }

@@ -6,6 +6,7 @@ namespace SoliantTest\SimpleFM\Repository\Builder;
 use Assert\InvalidArgumentException;
 use PHPUnit_Framework_TestCase as TestCase;
 use Prophecy\Argument;
+use Soliant\SimpleFM\Repository\Builder\Exception\HydrationException;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Embeddable;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Entity;
 use Soliant\SimpleFM\Repository\Builder\Metadata\Field;
@@ -71,7 +72,7 @@ final class MetadataHydrationTest extends TestCase
             $this->prophesize(RepositoryBuilderInterface::class)->reveal(),
             $entityMetadata
         );
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(HydrationException::class);
         $this->expectExceptionMessage('is not an array');
         $hydration->hydrateNewEntity(['bar' => 'bat']);
     }
