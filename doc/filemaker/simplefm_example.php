@@ -9,107 +9,138 @@
 
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
-ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
+$errorLogPath = dirname(__FILE__) . '/error.log';
+ini_set('error_log', $errorLogPath);
 error_reporting(E_ALL);
 
 require_once(__DIR__ . '/../../vendor/autoload.php');
 
 use Http\Client\Curl\Client;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Soliant\SimpleFM\Client\ResultSet\ResultSetClient;
 use Soliant\SimpleFM\Connection\Command;
 use Soliant\SimpleFM\Connection\Connection;
 use Zend\Diactoros\Uri;
 
 /**
- * The hostName can either be an IP address or any valid network name you have configured and hosting the FileMaker XML
- * API. FMServer_Sample.fmp12 is included with FileMaker Server 15 with guest access enabled by default. You should
- * always leave off the file extension when configuring dbName.
+ * Configure any Http\Client\HttpClient implementation. In this case we'll use Http\Client\Curl\Client, which is a good
+ * default choice for most cases.
+ */
+$httpClient = new Client();
+
+/**
+ * Configure any Psr\Http\Message\UriInterface implementation. In this case we'll use Zend\Diactoros\Uri, which is a
+ * good default choice for most cases.
+ */
+$uri = new Uri('http://localhost');
+
+/**
+ * Configure the database name. Do not include the file extension. For example, do NOT write 'FMServer_Sample.fmp12'
+ */
+$database = 'FMServer_Sample';
+
+/**
+ * You can create an optional Soliant\SimpleFM\Authentication\IdentityHandlerInterface, but for this example we don't
+ * need it, so we leave it null.
+ */
+$identityHandler = null;
+
+/**
+ * Configure an optional Psr\Log\LoggerInterface implementation to assist with debugging. In this case, we'll write a
+ * connection.log to the same directory as this simplefm_example.php file using Monolog\Logger.
+ */
+$logger = new Logger('connection');
+$connectionLogPath = dirname(__FILE__) . '/connection.log';
+$logger->pushHandler(new StreamHandler($connectionLogPath));
+
+/**
+ * Create a Soliant\SimpleFM\Connection\Connection with all the required dependencies injected.
  */
 $connection = new Connection(
-    new Client(),
-    new Uri('http://localhost'),
-    'FMServer_Sample'
+    $httpClient,
+    $uri,
+    $database,
+    $identityHandler,
+    $logger
 );
 
-$resultSetClient = new ResultSetClient($connection, new DateTimeZone('UTC'));
+/**
+ * Create a Soliant\SimpleFM\Client\ResultSet\ResultSetClient with the new Connection and a DateTimeZone;
+ */
+$resultSetClient = new ResultSetClient(
+    $connection,
+    new DateTimeZone('UTC')
+);
 
 /**
- * After you have initialized a SimpleFM Connection with valid credentials, you can execute it with a Command. The
- * Command expects a layout name and a command array. The command array follows the name/values defined by the XML API
- * syntax for FileMaker Server. See doc/filemaker/fms15_cwp_guide.pdf, Chapter 5 on page 40 for details.
+ * Now that you have configured a ResultSetClient, you can execute it with a Soliant\SimpleFM\Connection\Command. The
+ * Command expects a layout name and a command array. The command array accepts the name/values defined by the XML API
+ * syntax for FileMaker Server. Some of the FileMaker XML API commands are a key only (with no value). For example
+ * `-find`. For a command with no explicit value, use a null value in the command array.
+ * See doc/filemaker/fms15_cwp_guide.pdf, Chapter 5 on page 40 for XML API command documentation.
  */
-
-$records = $resultSetClient->execute(new Command('Task Details', ['-max' => 2, '-skip' => 1, '-findall' => null]));
+$command = new Command('Task Details', ['-max' => 2, '-skip' => 1, '-findall' => null]);
 
 /**
- * These are the elements simpleFM returns in the result array.
+ * When the Command is ready, execute it on the Client
  */
-$url = 'http://localhost/fmi/xml/yadda'; //$records->getDebugUrl();
-$errorCode = 0; //$records->getErrorCode();
-$errorMessage = 'No Error'; //$records->getErrorMessage();
-$errorType = 'FileMaker'; //$records->getErrorType();
-$count = 12;
-$fetchSize = 2;
+$records = $resultSetClient->execute($command);
 
 /**
  * Handle the result:
  *
- * While there is nothing wrong with is per se, the result formatting examples below are not intended to be followed as
- * examples. In particular, the stringifyValues function is not normally a technique you should use.
+ * The result formatting examples below are not intended to be followed as best practices. In particular, the
+ * stringifyValues function is not a technique you should normally use.
  *
  * See the Best Practices section of the included README.md for more information.
  */
 
 /**
- * Output some basic meta info about the request
+ * Basic info about the response
  */
 echo sprintf("<div style='background-color:EEF;padding:1em;margin:1em;border-style:dotted;border-width:thin;'>
-    Command URL: %s<br/>
-    Error:  %s<br/>
-    Error Text: %s<br/>
-    Error Type:  %s<br/>
+    Logs:<br/>
+    * %s<br/>
+    * %s<br/>
     Found Count: %s<br/>
     Fetch Size: %s<br/>
 </div>",
-$url,
-$errorCode,
-$errorMessage,
-$errorType,
-$count,
-$fetchSize
+    $connectionLogPath,
+    $errorLogPath,
+    '@todo Pagination',
+    count($records)
 );
 
-if ($errorCode === 0) {
-    /**
-     * Format the result rows like a FileMaker Table View
-     */
-    echo "<h2>Table View</h2><table border=1><tr><th>array key</th>";
-    $indexed = array_values($records);
-    foreach ($indexed[0] as $key => $value) {
-        echo "<th>$key</th>";
+/**
+ * Records formatted like a FileMaker Table View
+ */
+echo "<h2>Table View</h2><table border=1><tr><th>array key</th>";
+$indexed = array_values($records);
+foreach ($indexed[0] as $key => $value) {
+    echo "<th>$key</th>";
+}
+echo "</tr>";
+foreach ($records as $key => $data) {
+    echo "<tr><td>$key</td>";
+    foreach ($data as $value) {
+        echo sprintf("<td>%s</td>", stringifyValue($value));
     }
     echo "</tr>";
-    foreach ($records as $key => $data) {
-        echo "<tr><td>$key</td>";
-        foreach ($data as $value) {
-            echo sprintf("<td>%s</td>", stringifyValue($value));
-        }
-        echo "</tr>";
-    }
-    echo "</table>";
+}
+echo "</table>";
 
-    /**
-     * Format the result rows like a FileMaker Form in List View
-     */
-    echo "<h2>Form List View</h2>";
-    foreach ($records as $i => $data) {
-        echo "<table border=1>";
-        echo "<tr><th>array key</th><td>$i</td></tr>";
-        foreach ($data as $key => $value) {
-            echo sprintf("<tr><th>%s</th><td>%s</td></tr>", $key, stringifyValue($value));
-        }
-        echo "</table><br/>";
+/**
+ * Format the result rows like a FileMaker Form in List View
+ */
+echo "<h2>Form List View</h2>";
+foreach ($records as $i => $data) {
+    echo "<table border=1>";
+    echo "<tr><th>array key</th><td>$i</td></tr>";
+    foreach ($data as $key => $value) {
+        echo sprintf("<tr><th>%s</th><td>%s</td></tr>", $key, stringifyValue($value));
     }
+    echo "</table><br/>";
 }
 
 /**
@@ -117,7 +148,6 @@ if ($errorCode === 0) {
  */
 echo "<hr><pre>";
 var_dump($records);
-
 
 /**
  * IMPORTANT NOTE: The formatting code below is only designed to format html output for the above examples. This is
@@ -127,23 +157,7 @@ function stringifyValue($value) : string
 {
     $value = $value === "" ? "&nbsp;" : $value;
     if (is_array($value)) {
-        if (isset($value[0]) && isset($value[0]['record-id'])) {
-            $tempValue = '';
-            foreach ($value as $val) {
-                // portal
-                foreach ($val as $k => $v) {
-                    if (is_array($v)) {
-                        continue;
-                    }
-                    $tempValue .= $k . ':&nbsp;' . stringifyValue($v) . '<br>';
-                }
-                $tempValue .= '<hr>';
-            }
-            $value = $tempValue;
-        } else {
-            // repeating field
-            $value = implode("<br>", $value);
-        }
+        $value = arrayToParagraphs($value);
     } elseif ($value instanceof DateTimeImmutable) {
         $value = $value->format('m/d/Y');
     } else {
@@ -152,3 +166,30 @@ function stringifyValue($value) : string
     return $value;
 }
 
+function arrayToParagraphs($value)
+{
+    $count = count($value);
+    if ($count) {
+        $collapsedValue = '';
+        if (isset($value[0]) && isset($value[0]['record-id'])) {
+            // portal
+            $tempValue = '';
+            foreach ($value as $val) {
+                foreach ($val as $k => $v) {
+                    if (is_array($v)) {
+                        continue;
+                    }
+                    $tempValue .= $k . ':&nbsp;' . stringifyValue($v) . PHP_EOL;
+                }
+                $tempValue .= PHP_EOL;
+            }
+            $collapsedValue .= $tempValue;
+        } else {
+            // repeating field
+            $collapsedValue .= implode(PHP_EOL, $value);
+        }
+    } else {
+        return "&nbsp;";
+    }
+    return sprintf('<a href="#" title="%s">%d items</a>', $collapsedValue, $count);
+}
