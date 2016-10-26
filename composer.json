@@ -26,11 +26,14 @@
     },
     "require-dev": {
         "php-http/curl-client": "^1.6",
+        "monolog/monolog": "^1.9",
         "zendframework/zend-crypt": "^3.1",
         "phpunit/PHPUnit": "^5.5",
         "squizlabs/php_codesniffer": "^2.6"
     },
     "suggest": {
+        "php-http/curl-client": "For creating Connections",
+        "monolog/monolog": "For Connection logging",
         "zendframework/zend-crypt": "For using the block chain identity handler"
     },
     "autoload": {
